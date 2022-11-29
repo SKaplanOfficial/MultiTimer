@@ -116,9 +116,9 @@ def pause_timer(item, button, timer):
 
     hours, remainder = divmod(timer.time_remaining.total_seconds(), 3600)
     minutes, seconds = divmod(remainder, 60)
-    time_str = f"{int(minutes)}:{int(seconds)}"
+    time_str = f"{str(int(minutes)).zfill(2)}:{str(int(seconds)).zfill(2)}"
     if hours > 0:
-        time_str = f"{int(hours)}:" + time_str
+        time_str = f"{str(int(hours)).zfill(2)}:" + time_str
 
     item.title = "Resume"
     item.action = resume_timer
@@ -130,9 +130,9 @@ def update_submenus(menu, button):
         submenu = timer_submenus[index]
         hours, remainder = divmod(timer.time_remaining.total_seconds(), 3600)
         minutes, seconds = divmod(remainder, 60)
-        time_str = f"{int(minutes)}:{int(seconds)}"
+        time_str = f"{str(int(minutes)).zfill(2)}:{str(int(seconds)).zfill(2)}"
         if hours > 0:
-            time_str = f"{int(hours)}:" + time_str
+            time_str = f"{str(int(hours)).zfill(2)}:" + time_str
 
         if timer.paused:
             time_str = "Paused, " + time_str
@@ -144,7 +144,10 @@ def start_timer(item, button, duration: float):
     """
     title = item.title
     if title == "Custom Timer...":
-        title = f"{duration} seconds"
+        if duration < 60:
+            title = f"{duration} seconds"
+        else:
+            title = f"{round(duration / 60.0, 2)} minutes"
     timer = SimpleTimer(title, duration, show_alert)
 
     active_timers.append(timer)
@@ -166,10 +169,10 @@ def start_timer(item, button, duration: float):
 def create_custom_timer(item, button):
     """Prompts user for custom duration input and creates a timer with the that duration.
     """
-    response = PyXA.XADialog("Custom timer duration (seconds):", default_answer="60").display()
+    response = PyXA.XADialog("Custom timer duration (minutes):", default_answer="5").display()
     if (response):
         duration = float(response[1])
-        start_timer(item, button, duration)
+        start_timer(item, button, duration * 60.0)
 
 if __name__ == "__main__":
     # When the status indicator is hovered over, update all timer submenus
